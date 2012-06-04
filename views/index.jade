@@ -1,36 +1,5 @@
-!!! LANG=en_US.UTF-8
-html
-    head
-        title Sigong Chat
-        script(type='text/javascript', src='/socket.io/socket.io.js')
-body!= boday
 h1= title
 p Welcome to #{title}
 
-#chatWindow
-div#attendantsWindow
-    p 참가자
-    ul#attendants
-
-form
-    span#myName #{nickName}
-    input(type='text')#message
-    input(type='submit',value='보내기')
-
-script(type='text/javascript')
-    $(document).ready( function (){
-    
-    var chatWindow = $('#chatWindow');
-    var messageBox = $('#message');
-    var myName = $('#myName').text();
-
-    function showMessage(msg){
-        chatWindow.append($('<p>').text(msg));
-        chatWindow.scrollTop(chatWindow.height());
-    };
-
-    index.on('message', function(data) {
-        showMessage( data.nickName + ' : ' + data.msg );
-    });
-
-    });
+script
+    location.href = '/join/aaaa';

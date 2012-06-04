@@ -4,7 +4,8 @@
  */
 
 var express = require('express')
-  , rooms('./rooms')(app)
+  , uuid   = require('node-uuid')
+  , sys    = require('sys')
   , routes = require('./routes');
 
 var app = module.exports = express.createServer();
@@ -32,9 +33,17 @@ app.configure('production', function(){
 
 app.get('/', routes.index);
 
-app.listen(process.env.C9_PORT, function(){
-  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+app.get('/join/:id',function(req,res) {
+ res.render('chat', {
+        isSuccess : true
+        , title: 'Chat Room'
+        , roomName : 'babo'
+        , nickName : uuid.v4()
+ });
 });
 
-
-
+app.listen(process.env.PORT, function(){
+     sys.debug('Init Listen !!!');
+  require('./routes/rooms.js')(app);
+  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+});
