@@ -5,7 +5,7 @@
 
 var express = require('express')
   , uuid   = require('node-uuid')
-  , sys    = require('sys')
+  , sys    = require('util')
   , routes = require('./routes');
 
 var app = module.exports = express.createServer();
@@ -34,7 +34,7 @@ app.configure('production', function(){
 app.get('/', routes.index);
 
 app.get('/join/:id',function(req,res) {
- res.render('chat', {
+ res.render('room', {
         isSuccess : true
         , title: 'Chat Room'
         , roomName : 'babo'

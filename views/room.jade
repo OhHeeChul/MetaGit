@@ -1,0 +1,73 @@
+h1= title
+p Welcome to #{title}
+
+#chatWindow
+div#attendantsWindow
+    p 참가자
+    ul#attendants
+
+form
+    span#myName #{nickName}
+    input(type='text')#message
+    input(type='submit',value='보내기')
+
+script(type='text/javascript')
+    $(document).ready( function (){
+        
+        var room = io.connect('/room');
+        var chatWindow = $('#chatWindow');
+        var messageBox = $('#message');
+        var myName = $('#myName').text();
+        var attendants = $('#attendants');
+    
+        $('form').submit( function(e) {
+    
+            e.preventDefault();
+            var msg = messageBox.val();
+    
+            if($.trim(msg) !== '') {
+                showMessage( myName + ' : ' + msg );
+                //room.emit('message', { nickName : myName , msg:msg });
+                room.json.send( {nickName: myName, msg:msg });
+                messageBox.val('');
+            }
+    
+        });
+    
+        function showMessage(msg){
+            chatWindow.append($('<p>').text(msg));
+            chatWindow.scrollTop(chatWindow.height());
+        };
+    
+        room.on('message', function(data) {
+            showMessage( data.nickName + ' : ' + data.msg );
+        });
+    
+        room.on('joined', function(data) {
+            showMessage( data.nickName + ' 님이 입장 하셨습니다. ' );
+    
+            if(data.attendants != null)
+            {
+    
+                $.each(data.attendants, function(index, value) { 
+                    
+                    attendants.append($('<li>')
+                    .attr('id', 'attendant-' + value)
+                    .text(value));
+                });
+    
+            } else {
+            }
+
+
+                attendants.append($('<li>')
+                .attr('id', 'attendant-' + data.nickName)
+                .text(data.nickName));
+        });
+    
+    
+        room.emit('join' , { roomName:'aaa' , nickName : myName});
+
+    });
+
+    
