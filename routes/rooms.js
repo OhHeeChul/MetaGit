@@ -6,6 +6,7 @@ module.exports = function(app) {
    var uuid   = require('node-uuid');
    var nicknames = {};
    var clients = {};
+   
    /*
    io.configure(function() {
       io.set('log level', 3);
@@ -22,74 +23,78 @@ module.exports = function(app) {
     var Room = io.of('/room').on('connection', function(socket) {
         
     var joinedRoom = null;
-    clients[socket.id] = socket;
-     
-    socket.on('connectChatServer' , function(data) { 
-    });
+    var myNickName = null;
     
+    clients[socket.id] = socket;
+    
+    // 접속 종료시 Event
     socket.on('disconnect', function () {
-        
+         sys.debug('disconnect');  
+         
          if(joinedRoom){
-            Chat.leaveRoom(joinedRoom, socket.nickName);
-            socket.broadcast.to(joinedRoom).emit('leaved',
-            {nickName: socket.nickName});
+            Chat.leaveRoom(joinedRoom, socket.nickname);
+            socket.broadcast.to(joinedRoom).emit('leaved', {nickName: socket.nickname});
             socket.leave(joinedRoom);
             joinedRoom = null;
         }
         
         delete clients[socket.id];
-        // delete nicknames[socket.nickname];
     });
     
-    socket.on('leave', function (data) {
-        if(joinedRoom){
-            Chat.leaveRoom(joinedRoom, data.nickName);
-            socket.broadcast.to(joinedRoom).emit('leaved',
-            {nickName: data.nickName});
-            socket.leave(joinedRom);
-            joinedRoom = null;
-        }
-    });
-    
-    
-    socket.on('join' , function(data) {
-        sys.debug('Join Room!!!');
+    // 채팅방 나가기 Event
+    socket.on('leave', function () {
+        sys.debug('leave Event'); 
         
-        if(joinedRoom == data.roomName)
-        {
-            socket.emit('joined', { error: '현재 접속한 방입니다'} );
-            return;
-        }
-        else if(joinedRoom  != null && joinedRoom != data.roomName)
-        {
-            Chat.leaveRoom(joinedRoom, data.nickName);
-            socket.broadcast.to(joinedRoom).emit('leaved',
-            {nickName: data.nickName,  attendants: Chat.getAttendantsList(joinedRoom)});
+        if(joinedRoom){
+            Chat.leaveRoom(joinedRoom, myNickName); //data.nickName);
+            socket.broadcast.to(joinedRoom).emit('leaved', {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
             socket.leave(joinedRoom);
             joinedRoom = null;
         }
-        
-        if(Chat.hasRoom(data.roomName)){
+    });
+    
+     // 채팅방 접속 Event
+    socket.on('join' , function(data) {
+            sys.debug('Join Room!!!');
+            var roomName = data.subj + data.year + data.subjseq;
             
-            joinedRoom = data.roomName;
+            if(joinedRoom == roomName)
+            {
+                socket.emit('joined', { error: '현재 접속한 방입니다'} );
+                return;
+            }
+            else if(joinedRoom  != null && joinedRoom != roomName)
+            {
+                Chat.leaveRoom(joinedRoom, data.nickName);
+                socket.broadcast.to(joinedRoom).emit('leaved',
+                {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
+                socket.leave(joinedRoom);
+                joinedRoom = null;
+            }
+        
+            if(!Chat.hasRoom(roomName)){
+                sys.debug('방이 존재하지않으므로 방생성!!!');
+                Chat.addRoom(roomName,data.subj,data.year,data.subjseq);
+            }
+            
+            joinedRoom = roomName;
             socket.join(joinedRoom);
-            Chat.joinRoom(joinedRoom, data.nickName);
+            myNickName =  socket.nickname = Chat.joinRoom(joinedRoom, data.nickName);
+            
             socket.emit('joined', {
-                isSuccess: true, nickName : data.nickName,  attendants: Chat.getAttendantsList(data.roomName)
+                isSuccess: true, nickName : myNickName,  attendants: Chat.getAttendantsList(roomName)
             });
             socket.broadcast.to(joinedRoom).emit('joined', {
-                isSuccess: true, nickName : data.nickName,  attendants: Chat.getAttendantsList(data.roomName)
+                isSuccess: true, nickName : myNickName,  attendants: Chat.getAttendantsList(roomName)
             });
-            
-        } else {
-            socket.emit('joined', { error: 'Room is not Exist'} );
-        }
-    });
+                
+        });
     
         socket.on('message' , function(data) {
             if(joinedRoom) {
-               sys.debug('message success!!');
-                socket.broadcast.to(joinedRoom).json.send(data);   
+                sys.debug('message success!!');
+                socket.emit('message',{nickName:socket.nickname  , msg: data.msg});
+                socket.broadcast.to(joinedRoom).json.send({nickName:socket.nickname  , msg: data.msg});   
             } else {
                sys.debug('message failure!!');
             }
@@ -97,58 +102,14 @@ module.exports = function(app) {
         });
     
         socket.on('makeRoom' , function(data) {
-            Chat.addRoom(uuid.v1(),data.subj,data.year,data.subjseq);
+            Chat.addRoom(roomName,data.subj,data.year,data.subjseq);
             socket.emit('makeRoomSuccess', { roomList : Chat.getRoomList()});  
             socket.broadcast.emit('getAllRoomList',{ roomList : Chat.getRoomList()});  
         });
     
         
         socket.on('connectChatServer' , function(data, fn) {
-            
-            
-            
-            socket.nickname = data.nickName;
-            socket.set('nickname', data.nickName, function () {
-            });
-            socket.uuidCode = uuid.v1();
-            socket.set('uuidCode', socket.uuidCode, function () {
-            });
-            
-            sys.debug('Client Generate uuidCode  : ' + socket.uuidCode);
-            
-                if (nicknames[data.nickName]) 
-                {
-                    sys.debug('중복 로그인...');
-                    fn(true);
-                    
-                    for (var socketId in clients){
-                     
-                       var userSocket = clients[socketId];
-                       
-                  
-                       userSocket.get('nickname', function (err, name) {
-                          userSocket.get('uuidCode', function (err2, uuid) {
-                               sys.debug('Clients : ' + name + ' - ' + uuid);
-                       
-                               if(name === data.nickName &&  uuid != socket.uuidCode) {
-                                sys.debug('socket disconnection method : ' + userSocket);
-                                // userSocket.emit('forceDisconnect');
-                                socket.broadcast.emit('forceDisconnect', socketId);
-                               }
-                          });
-                       });
-                    }
-                    
-                    delete nicknames[data.nickName];
-                    nicknames[data.nickName] = data.nickName;
-    
-                } else {
-                    fn(false);
-                    nicknames[data.nickName] = data.nickName;
-                }
-                
-            sys.debug('Clients NickName: ' + socket.nickname);
-            socket.emit('getAllRoomList', { roomList : Chat.getRoomList()});   
+            fn({ isSuccess : true});   
         });
     
 

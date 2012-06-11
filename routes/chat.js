@@ -67,10 +67,38 @@ var Chat = module.exports = {
             return (element.name === roomName); 
         });
         
+        var joinUser = '';
+        
         if( !this.hasAttendant(rooms[0].attendants, user)){
             sys.debug(' Room Name : ' + rooms[0].name + ' Join User : ' + user);
-            rooms[0].attendants.push(user);   
+            rooms[0].attendants.push(user);
+            joinUser = user;
+        } else {
+            
+            var userList = rooms[0].attendants.filter(function(element) {
+                
+               return (String(element).split(' ')[0] === user); 
+            });
+            
+            var maxValue = 0;
+            
+            for(var i = 0; i < userList.length; i++)
+            {
+                var userNumber = String(String(userList[i]).split(' ')[1]).replace('(','').replace(')','');
+                
+                sys.debug('User Number : ' + userNumber);
+                
+                if(maxValue < Number(userNumber))
+                    maxValue = userNumber;
+            }
+            maxValue++;
+            
+            rooms[0].attendants.push(user + ' (' + maxValue + ')');
+            
+            joinUser = user + ' (' + maxValue + ')';
         }
+        
+        return joinUser;
     }
     , hasAttendant: function(attendants, user) {
        return attendants.some(function(element) {
