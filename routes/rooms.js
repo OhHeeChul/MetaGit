@@ -112,8 +112,13 @@ module.exports = function(app) {
     
         
         socket.on('connectChatServer' , function(data, fn) {
-            fn({ isSuccess : true});   
+            
+            if(data.nickName != '')
+                fn({ isSuccess : true});
+            else
+                fn({ isSuccess : false});    
         });
+        
     
 
     });
