@@ -84,7 +84,7 @@ module.exports = function(app) {
             socket.join(joinedRoom);
             myNickName =  socket.nickname = Chat.joinRoom(joinedRoom, data.nickName);
             
-            socket.emit('joined', {
+            socket.emit('initJoined', {
                 isSuccess: true, nickName : myNickName,  attendants: Chat.getAttendantsList(roomName)
             });
             socket.broadcast.to(joinedRoom).emit('joined', {
