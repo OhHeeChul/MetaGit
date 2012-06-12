@@ -6,10 +6,12 @@ module.exports = function(app) {
    var uuid   = require('node-uuid');
    var nicknames = {};
    var clients = {};
-   
-   /*
-   io.configure(function() {
+
+   io.configure('development', function() {
+      io.set('close timeout', 12);
+      io.set('polling duration', 8);
       io.set('log level', 3);
+      /*
       io.set('transports', [
          'websocket',
          'flashsocket',
@@ -17,8 +19,8 @@ module.exports = function(app) {
          'xhr-polling',
          'jsonp-polling'
       ]);
+      */
    });
-   */
    
     var Room = io.of('/room').on('connection', function(socket) {
         
@@ -33,7 +35,7 @@ module.exports = function(app) {
          
          if(joinedRoom){
             Chat.leaveRoom(joinedRoom, socket.nickname);
-            socket.broadcast.to(joinedRoom).emit('leaved', {nickName: socket.nickname});
+            socket.broadcast.to(joinedRoom).emit('leaved', {nickName: socket.nickname , attendants: Chat.getAttendantsList(joinedRoom)});
             socket.leave(joinedRoom);
             joinedRoom = null;
         }
