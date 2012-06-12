@@ -11,14 +11,15 @@ module.exports = function(app) {
       io.set('close timeout', 12);
       io.set('polling duration', 8);
       io.set('log level', 3);
-      /*
       io.set('transports', [
-         'websocket',
-         'flashsocket',
          'htmlfile',
          'xhr-polling',
          'jsonp-polling'
       ]);
+      
+      /*
+         'websocket',
+         'flashsocket',
       */
    });
    
