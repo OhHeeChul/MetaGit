@@ -49,8 +49,8 @@ app.get('/join/:id',function(req,res) {
         , nickName : uuid.v4()
  });
 });
-//11342
-app.listen(process.env.PORT, function(){
+//
+app.listen(11342, function(){
      sys.debug('Init Listen !!!');
   require('./routes/rooms.js')(app);
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
