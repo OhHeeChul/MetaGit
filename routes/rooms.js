@@ -95,7 +95,7 @@ module.exports = function(app) {
                 sys.debug("Has reconnect name !!! ... " + joinedRoom + socket.nickname);
                 Chat.leaveRoom(roomName, data.reconnectName);
                 socket.broadcast.to(roomName).emit('leaved',
-                {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
+                {nickName: myNickName,  attendants: Chat.getAttendantsList(roomName)});
                 joinedRoom = null;
             }
         
