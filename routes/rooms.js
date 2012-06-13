@@ -8,7 +8,7 @@ module.exports = function(app) {
    var clients = {};
 
    io.configure('development', function() {
-     // io.set('close timeout', 12);
+      io.set('close timeout', 12);
       io.set('polling duration', 8);
       io.set('log level', 3);
       io.set('transports', [
