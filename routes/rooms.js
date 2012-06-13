@@ -45,12 +45,12 @@ module.exports = function(app) {
     });
     
     // 채팅방 나가기 Event
-    socket.on('leave', function () {
+    socket.on('leave', function (data) {
         sys.debug('leave Event'); 
         
         if(joinedRoom){
-            Chat.leaveRoom(joinedRoom, myNickName); //data.nickName);
-            socket.broadcast.to(joinedRoom).emit('leaved', {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
+            Chat.leaveRoom(joinedRoom, data.nickName); //data.nickName);
+            socket.broadcast.to(joinedRoom).emit('leaved', {nickName: data.nickName,  attendants: Chat.getAttendantsList(joinedRoom)});
             socket.leave(joinedRoom);
             joinedRoom = null;
         }
@@ -72,6 +72,15 @@ module.exports = function(app) {
                 socket.broadcast.to(joinedRoom).emit('leaved',
                 {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
                 socket.leave(joinedRoom);
+                joinedRoom = null;
+            }
+            
+            if(data.reconnectName)
+            {
+                Chat.leaveRoom(roomName, data.reconnectName);
+                socket.broadcast.to(roomName).emit('leaved',
+                {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
+                socket.leave(roomName);
                 joinedRoom = null;
             }
         
