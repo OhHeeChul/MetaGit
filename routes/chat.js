@@ -118,6 +118,9 @@ var Chat = module.exports = {
            return (element.name === roomName); 
         });
         
+        sys.debug('leaveRoom : rooms Name :' + roomName);
+        sys.debug('leaveRoom : rooms length :' + rooms.length);
+        
         rooms[0].attendants.forEach(function(element, index, arr) {
            if( element === user ) {
              arr.splice(index, 1);   
