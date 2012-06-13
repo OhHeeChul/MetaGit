@@ -112,7 +112,7 @@ module.exports = function(app) {
     
         
         socket.on('connectChatServer' , function(data, fn) {
-            
+            sys.debug('connectChatServer !!!!!!!!!!!!!');          
             if(data.nickName != '')
                 fn({ isSuccess : true});
             else
