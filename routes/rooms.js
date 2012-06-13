@@ -56,6 +56,21 @@ module.exports = function(app) {
         }
     });
     
+    
+    socket.on('testleave',function(data) {
+       
+           var roomName = data.subj + data.year + data.subjseq;
+          
+           if(data.reconnectName)
+            {
+                sys.debug("Has reconnect name !!! ... " + joinedRoom + socket.nickname);
+                Chat.leaveRoom(roomName, data.reconnectName);
+                socket.broadcast.to(roomName).emit('leaved',
+                {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
+                joinedRoom = null;
+            }
+    });
+    
      // 채팅방 접속 Event
     socket.on('join' , function(data) {
             sys.debug('Join Room!!!');
@@ -77,10 +92,10 @@ module.exports = function(app) {
             
             if(data.reconnectName)
             {
+                sys.debug("Has reconnect name !!! ... " + joinedRoom + socket.nickname);
                 Chat.leaveRoom(roomName, data.reconnectName);
                 socket.broadcast.to(roomName).emit('leaved',
                 {nickName: myNickName,  attendants: Chat.getAttendantsList(joinedRoom)});
-                socket.leave(roomName);
                 joinedRoom = null;
             }
         
