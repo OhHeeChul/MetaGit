@@ -120,11 +120,17 @@ var Chat = module.exports = {
         
         sys.debug('leaveRoom : rooms Name :' + roomName);
         sys.debug('leaveRoom : rooms length :' + rooms.length);
+        sys.debug('leaveRoom : rooms length :' + user);
+        sys.debug('leaveRoom : rooms length :' + rooms[0].attendants);
         
-        rooms[0].attendants.forEach(function(element, index, arr) {
+       if(this.hasAttendant(rooms[0].attendants, user)){
+           rooms[0].attendants.forEach(function(element, index, arr) {
            if( element === user ) {
              arr.splice(index, 1);   
            }
-        });
+            });
+        }
+        
+
     }
 }
