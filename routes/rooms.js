@@ -56,6 +56,21 @@ module.exports = function(app) {
 			if(socket.isAdminMessager != null && socket.isAdminMessager == 'Y')
 			{
 				Chat.removeAdminList(socket.nickname);
+				
+				var adminRooms = Chat.getAdminList();
+			    var otherAdminList = adminRooms.filter(function(element) {
+		           return (element.socketId != socket.id); 
+		        });
+			    
+			    otherAdminList.forEach(function(element, index, arr) {
+		           var userSocketId = element.socketId;
+		           
+		           if(clients[userSocketId] != null) {
+						clients[userSocketId].emit('AdminListUpdate', {
+							adminList : Chat.getAdminList()
+						});
+		           }
+		        });
 			}
 			
 			delete clients[socket.id];
@@ -268,6 +283,21 @@ module.exports = function(app) {
 				Chat.addAdminUser(socket.id , socket.nickname);
 				fn({ isSuccess : false ,  errorMessage : '이미 해당 아이디는 등록되어 있습니다. 해당 아이디 삭제 후 재등록합니다' , adminList : Chat.getAdminList()});
 			}
+			
+			var adminRooms = Chat.getAdminList();
+		    var otherAdminList = adminRooms.filter(function(element) {
+	           return (element.socketId != socket.id); 
+	        });
+		    
+		    otherAdminList.forEach(function(element, index, arr) {
+	           var userSocketId = element.socketId;
+	           
+	           if(clients[userSocketId] != null) {
+					clients[userSocketId].emit('AdminListUpdate', {
+						adminList : Chat.getAdminList()
+					});
+	           }
+	        });	   
 		});
 	});
 
