@@ -55,7 +55,7 @@ module.exports = function(app) {
 			
 			if(socket.isAdminMessager != null && socket.isAdminMessager == 'Y')
 			{
-				Chat.removeAdminList(socket.nickname);
+				Chat.removeAdminList(socket.id, socket.nickname);
 				
 				var adminRooms = Chat.getAdminList();
 			    var otherAdminList = adminRooms.filter(function(element) {
@@ -279,7 +279,7 @@ module.exports = function(app) {
 				if(clients[Chat.getAdminSocketId(socket.nickname)] != null)
 					clients[Chat.getAdminSocketId(socket.nickname)].emit('force-disconnect');
 				
-				Chat.removeAdminList(socket.nickname);
+				//Chat.removeAdminList(socket.nickname);
 				Chat.addAdminUser(socket.id , socket.nickname);
 				fn({ isSuccess : false ,  errorMessage : '이미 해당 아이디는 등록되어 있습니다. 해당 아이디 삭제 후 재등록합니다' , adminList : Chat.getAdminList()});
 			}

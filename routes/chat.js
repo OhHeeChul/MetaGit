@@ -132,11 +132,14 @@ var Chat = module.exports = {
         
     }
     , getAttendantsList: function(roomName) {
-        var rooms = this.rooms.filter(function(element) {
+        var room = this.rooms.filter(function(element) {
            return (element.name === roomName); 
         });
         
-        return rooms[0].attendants;
+        if(room != null)
+        	return room[0].attendants;
+        else
+        	return null;
     }
     , getAdminRoomAttendantsList: function(roomName) {
         var room = this.adminRooms.filter(function(element) {
@@ -184,9 +187,9 @@ var Chat = module.exports = {
     	} else
     		return -1;
    }
-    , removeAdminList: function(nickName) {
+    , removeAdminList: function(socketId , nickName) {
     	this.adminUsers.forEach(function(element, index, arr) {
-	        if( element.nickname === nickName ) {
+	        if( element.nickname === nickName && element.socketId === socketId) {
 	          arr.splice(index, 1);   
 	        }
         });
@@ -196,18 +199,20 @@ var Chat = module.exports = {
            return (element.name === roomName); 
         });
         
-        sys.debug('leaveRoom : rooms Name :' + roomName);
-        sys.debug('leaveRoom : rooms length :' + room.length);
-        sys.debug('leaveRoom : rooms length :' + user);
-        sys.debug('leaveRoom : rooms length :' + room[0].attendants);
-        
-       if(this.hasAttendant(room[0].attendants, user)){
-           room[0].attendants.forEach(function(element, index, arr) {
-	           if( element === user ) {
-	             arr.splice(index, 1);   
-	           }
-           });
-       }
+        if(room != null) {
+	        sys.debug('leaveRoom : rooms Name :' + roomName);
+	        sys.debug('leaveRoom : rooms length :' + room.length);
+	        sys.debug('leaveRoom : rooms length :' + user);
+	        sys.debug('leaveRoom : rooms length :' + room[0].attendants);
+	        
+	       if(this.hasAttendant(room[0].attendants, user)){
+	           room[0].attendants.forEach(function(element, index, arr) {
+		           if( element === user ) {
+		             arr.splice(index, 1);   
+		           }
+	           });
+	       }
+        }
     }
     , leaveAdminRoom: function(roomName, user) {
         var room = this.adminRooms.filter(function(element) {
