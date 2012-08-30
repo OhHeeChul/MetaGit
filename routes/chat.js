@@ -112,15 +112,17 @@ var Chat = module.exports = {
         return joinUser;
     }
     , joinAdminRoom : function(roomName, user) {
-        var rooms = this.adminRooms.filter(function(element) {
+        var room = this.adminRooms.filter(function(element) {
             return (element.name === roomName); 
         });
         
-        var joinUser = '';
-        sys.debug(' Room Name : ' + rooms[0].name + ' Join User : ' + user);
-        rooms[0].attendants.push(user);
-        joinUser = user;
-        return joinUser;
+        if(room != null && room.length != 0) {
+	        var joinUser = '';
+	        sys.debug(' Room Name : ' + room[0].name + ' Join User : ' + user);
+	        room[0].attendants.push(user);
+	        joinUser = user;
+	        return joinUser;
+        }
     }
     
     , hasAttendant: function(attendants, user) {
@@ -137,11 +139,14 @@ var Chat = module.exports = {
         return rooms[0].attendants;
     }
     , getAdminRoomAttendantsList: function(roomName) {
-        var rooms = this.adminRooms.filter(function(element) {
+        var room = this.adminRooms.filter(function(element) {
            return (element.name === roomName); 
         });
         
-        return rooms[0].attendants;
+        if(room != null)
+        	return room[0].attendants;
+        else 
+        	return null;
     }
     , hasAdminAttendant: function(nickName) {
     	var admin = this.adminUsers.filter(function(element) {
@@ -162,13 +167,23 @@ var Chat = module.exports = {
             return (element.nickname === nickName); 
          });
     	
-		 if( admin.length > 0 ) {
+		 if( admin != null && admin.length > 0 ) {
 			 return admin[0].socketId;
 		 }
 		 else{
 			 return -1;
 		 }
     }
+    , getRandomAdminSocketId: function() {
+    	
+    	if(this.adminUsers != null && this.adminUsers.length != 0)
+	    { 
+	    	 var num = Math.floor((Math.random() * this.adminUsers.length));
+		   	 var admin = this.adminUsers[num];
+			 return admin.socketId;
+    	} else
+    		return -1;
+   }
     , removeAdminList: function(nickName) {
     	this.adminUsers.forEach(function(element, index, arr) {
 	        if( element.nickname === nickName ) {
@@ -199,31 +214,34 @@ var Chat = module.exports = {
            return (element.name === roomName); 
         });
         
-        sys.debug('leaveRoom : rooms Name :' + roomName);
-        sys.debug('leaveRoom : rooms length :' + room.length);
-        sys.debug('leaveRoom : rooms length :' + user);
-        sys.debug('leaveRoom : rooms length :' + room[0].attendants);
-        
-       if(this.hasAttendant(room[0].attendants, user)){
-           room[0].attendants.forEach(function(element, index, arr) {
-	           if( element === user ) {
-	             arr.splice(index, 1);   
-	           }
-           });
-           
-           if(room[0].attendants.length == 0)
-           {
-        	   sys.debug('남은 유저가 없으므로 방을 삭제합니다');
-        	   
-        	   this.adminRooms.filter(function(element, index, arr) {
-	    	        if(element.name === room[0].name ) {
-	    	          arr.splice(index, 1);   
-	    	        }
+        if(room != null) {
+        	
+	        sys.debug('leaveRoom : rooms Name :' + roomName);
+	        sys.debug('leaveRoom : rooms length :' + room.length);
+	        sys.debug('leaveRoom : rooms will Delete User :' + user);
+	        sys.debug('leaveRoom : rooms attendants :' + room[0].attendants);
+	        
+	       if(this.hasAttendant(room[0].attendants, user)){
+	           room[0].attendants.forEach(function(element, index, arr) {
+		           if( element === user ) {
+		             arr.splice(index, 1);   
+		           }
 	           });
-        	   
-        	   if(this.adminRooms != null)
-        		   sys.debug('남은 1:1 채팅방 수 : ' + this.adminRooms.length);
-           }
-       }
+	           
+	           if(room[0].attendants.length == 0)
+	           {
+	        	   sys.debug('남은 유저가 없으므로 방을 삭제합니다');
+	        	   
+	        	   this.adminRooms.filter(function(element, index, arr) {
+		    	        if(element.name === room[0].name ) {
+		    	          arr.splice(index, 1);   
+		    	        }
+		           });
+	        	   
+	        	   if(this.adminRooms != null)
+	        		   sys.debug('남은 1:1 채팅방 수 : ' + this.adminRooms.length);
+	           }
+	       }
+        }
     }
 }

@@ -8,8 +8,9 @@ module.exports = function(app) {
 	var clients = {};
 
 	io.configure('development', function() {
-		io.set('close timeout', 12);
-		io.set('polling duration', 8);
+		io.enable('browser client etag');
+		io.set('close timeout', 30);
+		io.set('polling duration', 20);
 		io.set('log level', 3);
 		io.set('transports', [
 		                      'htmlfile',
@@ -29,7 +30,6 @@ module.exports = function(app) {
 		var joinedAdminRoom = null;
 
 		var myNickName = null;
-
 		var mySessionId = null;
 
 		clients[socket.id] = socket;
@@ -52,8 +52,10 @@ module.exports = function(app) {
 				joinedAdminRoom = null;
 			}
 			
-			if(socket.isAdmin != null && socket.isAdmin == 'Y')
+			if(socket.isAdminMessager != null && socket.isAdminMessager == 'Y')
+			{
 				Chat.removeAdminList(socket.nickname);
+			}
 			
 			delete clients[socket.id];
 		});
@@ -147,12 +149,18 @@ module.exports = function(app) {
 			});
 
 			// 관리자를 초대합니다
-			if(clients[Chat.getAdminSocketId('garam')] != null)
-			clients[Chat.getAdminSocketId('garam')].emit('invitedAdmin', {
-				roomName : roomName,
-				msg : data.msg ,
-				userId : myNickName
-			});
+			var randomSocketId = Chat.getRandomAdminSocketId();
+			if(clients[randomSocketId] != null) {
+				clients[randomSocketId].emit('invitedAdmin', {
+					roomName : roomName,
+					msg : data.msg ,
+					loginId : myNickName,
+					userId : data.userId
+				});
+			}
+			else {
+				socket.emit('noAdminList');
+			}
 		});
 
 		// 1:1 채팅방 관리자 접속 Event (
@@ -166,7 +174,7 @@ module.exports = function(app) {
 			Chat.joinAdminRoom(joinedAdminRoom, socket.nickname);
 			
 			socket.emit('initJoined', {
-				isSuccess: true, nickName : myNickName,  attendants: Chat.getAdminRoomAttendantsList(roomName)
+				isSuccess: true, nickName : myNickName
 			});
 
 			socket.broadcast.to(joinedAdminRoom).emit('joined', {
@@ -237,7 +245,7 @@ module.exports = function(app) {
 				fn({ isSuccess : true});
 				myNickName =  socket.nickname = data.nickName;
 				mySessionId = socket.sessionId = data.sessionId;
-				
+				socket.isAdminMessager = 'Y';
 			}
 			else
 				fn({ isSuccess : false});    
