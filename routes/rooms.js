@@ -13,14 +13,15 @@ module.exports = function(app) {
 		io.set('polling duration', 20);
 		io.set('log level', 3);
 		io.set('transports', [
-		                      'htmlfile',
-		                      'xhr-polling',
+		                      'websocket',
+		                      'flashsocket',
 		                      'jsonp-polling'
 		                      ]);
 
 		/*
-         'websocket',
-         'flashsocket',
+       
+		                      'htmlfile',
+		                      'xhr-polling',
 		 */
 	});
 
